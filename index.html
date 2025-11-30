@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Padibox - Twój świat zapachów</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Ekran główny -->
+    <div id="home-screen" class="screen active">
+        <div class="header">
+            <img src="images/logo.png" alt="Padibox Logo" class="logo-image" onerror="tryLogoFormat(this)">
+            <svg class="logo-image logo-fallback" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                <defs>
+                    <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FF8C00;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <!-- Dinozaur -->
+                <ellipse cx="100" cy="100" rx="60" ry="50" fill="url(#orangeGradient)"/>
+                <circle cx="80" cy="85" r="8" fill="#1a1a1a"/>
+                <circle cx="120" cy="85" r="8" fill="#1a1a1a"/>
+                <path d="M 70 110 Q 100 120 130 110" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+                <circle cx="100" cy="60" r="15" fill="url(#orangeGradient)"/>
+                <circle cx="85" cy="55" r="8" fill="url(#orangeGradient)"/>
+                <circle cx="115" cy="55" r="8" fill="url(#orangeGradient)"/>
+            </svg>
+            <p class="subtitle">Twój świat zapachów</p>
+        </div>
+
+        <div class="sections-container">
+            <button class="section-card" onclick="showScreen('profile')">
+                <span class="section-emoji">👤</span>
+                <span class="section-title">Profil</span>
+            </button>
+            <button class="section-card" onclick="showScreen('map')">
+                <span class="section-emoji">🗺️</span>
+                <span class="section-title">Mapa</span>
+            </button>
+            <button class="section-card" onclick="showScreen('points')">
+                <span class="section-emoji">⭐</span>
+                <span class="section-title">Punkty</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ekran profilu -->
+    <div id="profile-screen" class="screen">
+        <div class="profile-content">
+            <button class="back-button" onclick="showScreen('home')">← Powrót</button>
+            
+            <h1 class="profile-header">Twój Profil</h1>
+
+            <div class="profile-section">
+                <label class="profile-label">Wiek</label>
+                <input type="number" id="age" class="profile-input" placeholder="Podaj swój wiek" maxlength="3">
+            </div>
+
+            <div class="profile-section">
+                <label class="profile-label">Płeć</label>
+                <div class="gender-container">
+                    <button class="gender-button" onclick="selectGender('Kobieta')">Kobieta</button>
+                    <button class="gender-button" onclick="selectGender('Mężczyzna')">Mężczyzna</button>
+                    <button class="gender-button" onclick="selectGender('Inna')">Inna</button>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <label class="profile-label">Miasto</label>
+                <input type="text" id="city" class="profile-input" placeholder="Podaj swoje miasto">
+            </div>
+
+            <div class="profile-section">
+                <p class="scent-title">Ulubione zapachy</p>
+                <div class="scent-grid">
+                    <button class="scent-card" onclick="toggleScent('fresh')">
+                        <span class="scent-emoji">🌿</span>
+                        <span class="scent-label">Świeże</span>
+                    </button>
+                    <button class="scent-card" onclick="toggleScent('sweet')">
+                        <span class="scent-emoji">🍬</span>
+                        <span class="scent-label">Słodkie</span>
+                    </button>
+                    <button class="scent-card" onclick="toggleScent('woody')">
+                        <span class="scent-emoji">🌲</span>
+                        <span class="scent-label">Drzewne</span>
+                    </button>
+                    <button class="scent-card" onclick="toggleScent('oriental')">
+                        <span class="scent-emoji">✨</span>
+                        <span class="scent-label">Orientalne</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Rekomendacje perfum w profilu -->
+            <div id="profile-recommendations" class="profile-section" style="display: none;">
+                <h3 class="recommendations-title">🎯 Polecane dla Ciebie</h3>
+                <div id="profile-perfume-list"></div>
+            </div>
+
+            <button class="save-button" onclick="saveProfile()">Zapisz profil</button>
+        </div>
+    </div>
+
+    <!-- Ekran mapy -->
+    <div id="map-screen" class="screen">
+        <button class="back-button" onclick="showScreen('home')">← Powrót</button>
+        <div class="map-container">
+            <h2 class="map-title">Mapa Punktów</h2>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Modal z informacjami o punkcie -->
+    <div id="location-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 class="modal-title">🍊 KLUB Pomarańcza</h2>
+            <p class="modal-location">📍 Katowice</p>
+            <div class="perfume-image-gallery">
+                <div class="image-slider">
+                    <div class="slider-container">
+                        <img src="images/automat1.jpeg" alt="PadiBox - Automat z perfumami" class="slider-image active" onerror="console.error('Nie można załadować:', this.src); tryAlternativeFormat(this, 'automat1', 1)">
+                        <img src="images/automat2.jpeg" alt="PadiBox - Automat z perfumami" class="slider-image" onerror="console.error('Nie można załadować:', this.src); tryAlternativeFormat(this, 'automat2', 2)">
+                        <img src="images/automat3.jpeg" alt="PadiBox - Automat z perfumami" class="slider-image" onerror="console.error('Nie można załadować:', this.src); tryAlternativeFormat(this, 'automat3', 3)">
+                        
+                        <!-- Placeholdery na wypadek braku zdjęć -->
+                        <div class="automat-placeholder placeholder-1 active">
+                            <div class="automat-screen">
+                                <div class="perfume-bottles">
+                                    <div class="bottle" style="background: linear-gradient(135deg, #FFD700, #FFA500)"></div>
+                                    <div class="bottle" style="background: linear-gradient(135deg, #FF6B6B, #C92A2A)"></div>
+                                    <div class="bottle" style="background: linear-gradient(135deg, #4ECDC4, #1A535C)"></div>
+                                    <div class="bottle" style="background: linear-gradient(135deg, #95E1D3, #38A3A5)"></div>
+                                </div>
+                                <div class="automat-text">PadiBox</div>
+                                <div style="color: #999; font-size: 12px; margin-top: 10px;">Widok 1</div>
+                            </div>
+                        </div>
+                        <div class="automat-placeholder placeholder-2">
+                            <div class="automat-screen">
+                                <div class="perfume-bottles">
+                                    <div class="bottle" style="background: linear-gradient(135deg, #95E1D3, #38A3A5)"></div>
+                                    <div class="bottle" style="background: linear-gradient(135deg, #FFD700, #FFA500)"></div>
+                                    <div class="bottle" style="background: linear-gradient(135deg, #FF6B6B, #C92A2A)"></div>
+                                    <div class="bottle" style="background: linear-gradient(135deg, #4ECDC4, #1A535C)"></div>
+                                </div>
+                                <div class="automat-text">PadiBox</div>
+                                <div style="color: #999; font-size: 12px; margin-top: 10px;">Widok 2</div>
+                            </div>
+                        </div>
+                        <div class="automat-placeholder placeholder-3">
+                            <div class="automat-screen">
+                                <div class="perfume-bottles">
+                                    <div class="bottle" style="background: linear-gradient(135deg, #4ECDC4, #1A535C)"></div>
+                                    <div class="bottle" style="background: linear-gradient(135deg, #95E1D3, #38A3A5)"></div>
+                                    <div class="bottle" style="background: linear-gradient(135deg, #FFD700, #FFA500)"></div>
+                                    <div class="bottle" style="background: linear-gradient(135deg, #FF6B6B, #C92A2A)"></div>
+                                </div>
+                                <div class="automat-text">PadiBox</div>
+                                <div style="color: #999; font-size: 12px; margin-top: 10px;">Widok 3</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="slider-btn prev" onclick="changeSlide(-1)">❮</button>
+                    <button class="slider-btn next" onclick="changeSlide(1)">❯</button>
+                    
+                    <div class="slider-dots">
+                        <span class="dot active" onclick="currentSlide(0)"></span>
+                        <span class="dot" onclick="currentSlide(1)"></span>
+                        <span class="dot" onclick="currentSlide(2)"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="perfume-list">
+                <h3>Dostępne perfumy:</h3>
+                <div id="perfume-recommendations"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ekran punktów -->
+    <div id="points-screen" class="screen">
+        <button class="back-button" onclick="showScreen('home')">← Powrót</button>
+        <div class="construction-content">
+            <span class="construction-emoji">⭐</span>
+            <h1 class="construction-title">Punkty</h1>
+            <p class="construction-subtitle">W budowie</p>
+        </div>
+    </div>
+
+    <!-- Social Media Footer -->
+    <div class="social-footer">
+        <a href="https://www.instagram.com/the_padibox" target="_blank" class="social-link instagram">
+            <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+            <span>@the_padibox</span>
+        </a>
+        <a href="https://www.facebook.com/PadiBox" target="_blank" class="social-link facebook">
+            <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+            <span>PadiBox</span>
+        </a>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
